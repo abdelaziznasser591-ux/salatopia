@@ -1,0 +1,16 @@
+# Salatopia — static site, no build step needed
+[build]
+  publish = "."
+  command = ""
+
+# Keep the admin panel out of search engines
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+# Always serve fresh menu data (so edits appear immediately)
+[[headers]]
+  for = "/data/menu.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

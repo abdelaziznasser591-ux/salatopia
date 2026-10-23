@@ -1,0 +1,81 @@
+backend:
+  name: git-gateway
+  branch: main
+
+# Where uploaded photos are stored and served from
+media_folder: "img"
+public_folder: "img"
+
+# Nicer UX
+publish_mode: simple
+locale: en
+site_url: https://salatopia.netlify.app
+display_url: https://salatopia.netlify.app
+logo_url: https://salatopia.netlify.app/img/logo.jpg
+
+collections:
+  - name: "menu"
+    label: "🥗 Menu"
+    label_singular: "Menu"
+    delete: false
+    files:
+      - name: "menu_data"
+        label: "Full Menu & Settings"
+        file: "data/menu.json"
+        description: "Edit prices, photos, names, availability — everything on the website."
+        extension: json
+        format: json
+        editor:
+          preview: false
+        fields:
+          - label: "⚙️ Shop Settings"
+            name: settings
+            widget: object
+            collapsed: false
+            fields:
+              - { label: "WhatsApp number (no + or spaces, e.g. 96178706644)", name: whatsapp, widget: string, pattern: ['^[0-9]{8,15}$', 'Digits only, include country code, no + or spaces'] }
+              - { label: "Instagram username (without @)", name: instagram_user, widget: string, required: false }
+              - { label: "Instagram full link", name: instagram_url, widget: string, required: false }
+              - { label: "Currency symbol", name: currency, widget: string, default: "$" }
+
+          - label: "📂 Categories"
+            name: categories
+            widget: list
+            label_singular: "Category"
+            summary: "{{fields.en}}  ·  {{fields.ar}}"
+            fields:
+              - { label: "ID (lowercase, no spaces — do not change once set)", name: id, widget: string, pattern: ['^[a-z0-9_-]+$', 'lowercase letters, numbers, - or _ only'] }
+              - { label: "Name (English)", name: en, widget: string }
+              - { label: "Name (Arabic)", name: ar, widget: string }
+              - label: "Layout style"
+                name: type
+                widget: select
+                options:
+                  - { label: "Round floating plates (for salads/bowls)", value: "plates" }
+                  - { label: "Photo cards (for drinks, sandwiches, etc.)", value: "cards" }
+                default: "cards"
+              - { label: "Display order (1 = first)", name: order, widget: number, value_type: int, default: 1 }
+
+          - label: "🍽️ Menu Items"
+            name: items
+            widget: list
+            label_singular: "Item"
+            summary: "{{fields.en}}  —  {{#if fields.sized}}L {{fields.L}} / S {{fields.S}}{{else}}{{fields.P}}{{/if}}{{#if fields.available}}{{else}}  (HIDDEN){{/if}}"
+            fields:
+              - { label: "ID (lowercase, unique — do not change once set)", name: id, widget: string, pattern: ['^[a-z0-9_-]+$', 'lowercase letters, numbers, - or _ only'] }
+              - label: "Category"
+                name: cat
+                widget: select
+                options: ["salads", "sandwiches", "dips", "sweet", "drinks"]
+                hint: "Must match a category ID above."
+              - { label: "Photo", name: img, widget: image, media_library: { config: { max_file_size: 2000000 } }, hint: "Upload a clear photo. Square photos look best for salad bowls." }
+              - { label: "Show on website?", name: available, widget: boolean, default: true, hint: "Turn OFF to temporarily hide/sell-out an item without deleting it." }
+              - { label: "Display order (1 = first in its category)", name: order, widget: number, value_type: int, default: 1 }
+              - { label: "Name (English)", name: en, widget: string }
+              - { label: "Name (Arabic)", name: ar, widget: string }
+              - { label: "Description (English)", name: den, widget: text, required: false }
+              - { label: "Description (Arabic)", name: dar, widget: text, required: false }
+              - { label: "Has two sizes (Large / Small)?", name: sized, widget: boolean, default: false, hint: "ON = salads with L & S prices. OFF = single price (drinks, sandwiches)." }
+              - { label: "Large price", name: L, widget: number, value_type: float, required: false, hint: "Only if 'Has two sizes' is ON." }
+              - { label: "Small price", name: S, widget: number, value_type: float, required: false, hint: "Only if 'Has two sizes' is ON." }
+              - { label: "Single price", name: P, widget: number, value_type: float, required: false, hint: "Only if 'Has two sizes' is OFF." }

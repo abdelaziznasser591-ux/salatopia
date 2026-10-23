@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Salatopia · Admin</title>
+  <link rel="icon" href="/img/logo.jpg" />
+  <style>
+    /* Branded loading screen shown before the CMS mounts */
+    :root{--forest:#123A22;--green:#1F7A3D;--sage:#D6E8C8;--cream:#FAF7EF;--gold:#C9A961}
+    html,body{margin:0;height:100%}
+    #boot{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+      background:radial-gradient(120% 120% at 50% 0%,#1B4D2E 0%,var(--forest) 60%,#0C2A18 100%);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    #boot .ring{width:60px;height:60px;border-radius:50%;border:3px solid rgba(214,232,200,.25);border-top-color:var(--gold);animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #boot .name{color:var(--sage);font-weight:800;letter-spacing:.3em;font-size:22px}
+    #boot .sub{color:var(--gold);letter-spacing:.3em;font-size:11px;text-transform:uppercase}
+    #boot .hint{color:rgba(214,232,200,.6);font-size:12.5px;margin-top:8px;max-width:280px;text-align:center;line-height:1.6}
+  </style>
+</head>
+<body>
+  <div id="boot">
+    <div class="name">SALATOPIA</div>
+    <div class="ring"></div>
+    <div class="sub">Admin Panel</div>
+    <div class="hint" id="bootHint">Loading your dashboard…</div>
+  </div>
+
+  <!-- Netlify Identity widget: handles secure owner login -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <!-- Decap CMS: the admin dashboard itself -->
+  <script src="https://unpkg.com/decap-cms@^3.8.4/dist/decap-cms.js"></script>
+
+  <script>
+    // Hide the boot screen once the CMS UI appears
+    function hideBoot(){ var b=document.getElementById('boot'); if(b) b.style.display='none'; }
+    if (window.CMS) {
+      window.CMS.registerEventListener({ name:'preSave', handler:function(){} });
+    }
+    // Decap fires no universal "ready" event across versions, so poll for its root
+    var tries=0, iv=setInterval(function(){
+      tries++;
+      if (document.querySelector('#nc-root [class*="app"], #nc-root form, .css-login, [class*="Login"]')) { hideBoot(); clearInterval(iv); }
+      if (tries>60){ hideBoot(); clearInterval(iv); }
+    }, 300);
+
+    // After login, send the owner back to the dashboard (not the Identity page)
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", function(user){
+        if (!user) {
+          window.netlifyIdentity.on("login", function(){ document.location.href = "/admin/"; });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
